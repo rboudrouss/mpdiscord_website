@@ -6,7 +6,7 @@
     <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css" integrity="sha256-46qynGAkLSFpVbEBog43gvNhfrOj+BmwXdxFgVK/Kvc=" crossorigin="anonymous"/>
-    <link rel="stylesheet" href="../static/css/style.css">
+    <link rel="stylesheet" href="{{url_for('static',filename='css/styles.css')}}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="../static/img/discordlogo.png" />
     {% block head %}{% endblock %}
@@ -14,7 +14,7 @@
 <body>
     <header>
         <div class="logo">
-            <a href="http://rboud.pythonanywhere.com" target="_blank">
+            <a href="/">
                 <img src="../static/img/devrboud.png" alt="dev logo">
             </a>
         </div>
@@ -24,22 +24,13 @@
         </button>
         <nav class="nav">
             <ul class="nav__list">
-                <li class="nav__item"><a href="#" class="nav__link">Home</a></li>
-                <li class="nav__item"><a href="#" class="nav__link">Liste des utilisateurs</a></li>
+                <li class="nav__item"><a href="/" class="nav__link">Home</a></li>
+                <li class="nav__item"><a href="/userlist" class="nav__link">Liste des utilisateurs</a></li>
             </ul>
         </nav>
     </header>
 
-    <section class="about" id="about">
-        <h2 class="section__title section__title--about">On off discord mp</h2>
-        <p class="section__subtitle section__subtitle--about">c'est trop bien</p>
-        
-        <div class="about__body">
-            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Et, molestias itaque! Quaerat nemo, similique ullam recusandae qui magni numquam laudantium illo alias maiores eum repudiandae!</p>
-        </div>
-
-        <img src="{{url_for('static',filename='img/calculatrice.jpg')}}" alt="" class="about-me__img">
-    </section>
+    {% block content %}{% endblock %}
 
 
     <!-- Footer -->

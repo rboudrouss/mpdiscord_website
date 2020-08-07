@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block head %}
+<style>
+    a,
+    a:visited{
+        text-decoration: none;
+        color: inherit;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<ul>
+    {% for user in users %}
+    <a href="/u/{{ user }}">
+        <li>{{ user }} mps are {{ users[user] }}</li>
+    </a>
+    {% endfor %}
+</ul>
+{% endblock %}
