@@ -1,8 +1,31 @@
-from flask import Flask, render_template,request,redirect,url_for
-from json import loads,dumps
+from flask import Flask, render_template, request, redirect, url_for, session, flash
+from json import loads,  dumps
 app = Flask(__name__)
-IDUSER = ""
+app.secret_key="not my actual secret key :p" # TODO find a better secret key
+# TODO account modification & compress useron,useroff,usernone.html in one file
 
+# fonctions
+def write_users(users):
+    with open("./static/data/users.json",'w') as f:
+        f.write(dumps(users,sort_keys=True, indent=4))
+    return True
+
+def read_users():
+    with open("./static/data/users.json",'r') as f:
+        accounts = loads(f.read())
+    return accounts
+
+def write_accounts(accounts):
+    with open("./static/data/accounts.json",'w') as f:
+        f.write(dumps(accounts,sort_keys=True, indent=4))
+    return True
+
+def read_accounts():
+    with open("./static/data/accounts.json",'r') as f:
+        accounts = loads(f.read())
+    return accounts
+
+# web app
 @app.route('/')
 def home():
     return render_template("home.html")
@@ -21,75 +44,105 @@ def admin():
 
 @app.route('/login', methods=['POST','GET'])
 def login():
-    global IDUSER
-    if request.method == "POST":
-        mail=request.form["mail"]
-        pwd=request.form["password"]
-        with open("./static/data/accounts.json",'r') as f:
-            accounts = loads(f.read())
+    if 'id' in session:
+        flash("already logged")
+        return redirect(url_for('mymps'))
+    else:
+        if request.method == "POST":
+            
+            # information requests
+            mail=request.form["mail"]
+            pwd=request.form["password"]
+            
+            # get accounts
+            accounts = read_accounts()
+            
+            # login teatement
             if accounts.get(mail,False):
                 if accounts[mail]["password"] == pwd:
-                    IDUSER = accounts[mail]["id"]
-                    print("logged in as", IDUSER)
+                    session["id"] = accounts[mail]["id"]
+                    print("logged in as", session["id"])
+                    flash("successfully logged")
                     return redirect(url_for('mymps'))
                 else:
+                    flash('wrong password')
                     print("wrong password")
             else:
+                flash('wrong email')
                 print("wrong email")
-    return render_template("login.html")
+        # return to login page in case of error or first visit
+        return render_template("login.html")
 
 @app.route('/register',methods=["POST","GET"])
 def register():
-    global IDUSER
-    if request.method == "POST":
-        mail=request.form["mail"]
-        pwd=request.form["password"]
-        id_d = request.form["id"]
-        with open("./static/data/accounts.json",'r') as f:
-            accounts = loads(f.read())
-        accounts[mail]={
-            "id":id_d,
-            "password": pwd
-        }
-        with open("./static/data/accounts.json",'w') as f:
-            f.write(dumps(accounts,sort_keys=True, indent=4))
-        return redirect(url_for("home"))
-    return render_template("register.html")
+    # global IDUSER
+    if 'id' in session:
+        flash("already logged")
+        return redirect(url_for('mymps'))
+    else:
+        if request.method == "POST":
+            
+            # request informations
+            mail=request.form["mail"]
+            pwd=request.form["password"]
+            id_d = request.form["id"]
+            
+            # create a new account
+            accounts = read_accounts()
+            accounts[mail]={
+                "id":id_d,
+                "password": pwd
+            }
+            assert write_accounts(accounts)
+            
+            # Create a new user
+            users = read_users()
+            users[id_d]="on"
+            assert write_users(users)
+            
+            # return to home if successufuly registered
+            flash('successfully registred')
+            return redirect(url_for("home"))
+        # return to register if first visit
+        return render_template("register.html")
 
 @app.route('/u/<user>')
 def user(user):
-    with open("./static/data/users.json",'r') as f:
-        users = loads(f.read())
-        open_mp = users.get(user,"Not a user")
-        if open_mp == "on":
-            return render_template("useron.html",user=user)
-        elif open_mp == "off":
-            return render_template("useroff.html",user=user)
-        else:
-            return render_template("usernone.html", user=user)
+    users = read_users()
+    open_mp = users.get(user,"Not a user")
+    if open_mp == "on":
+        return render_template("useron.html",user=user)
+    elif open_mp == "off":
+        return render_template("useroff.html",user=user)
+    else:
+        return render_template("usernone.html", user=user)
     return open_mp
 
 @app.route('/userlist')
 def userlist():
-    with open("./static/data/users.json",'r') as f:
-        users = loads(f.read())
-        return render_template("userlist.html",users=users)
+    users = read_users()
+    return render_template("userlist.html",users=users)
 
 @app.route('/mymps',methods=["POST","GET"])
 def mymps():
-    if not IDUSER:
-        with open("./static/data/users.json",'r') as f:
-            users = loads(f.read())
-            mps_statu = users[IDUSER]
+    if 'id' in session:
+        users = read_users()
         if request.method == "POST":
-            with open("./static/data/users.json",'r') as f:
-                users = loads(f.read())
-            users[IDUSER] = "on" if users[IDUSER] == "off" else "off"
-            with open("./static/data/users.json",'w') as f:
-                f.write(dumps(users,sort_keys=True, indent=4))
-        return render_template("mymps.html", mp = mps_statu)
+            users[session["id"]] = "on" if users[session["id"]] == "off" else "off"
+            write_users(users)
+        return render_template("mymps.html", mp = users[session["id"]])
     else:
         return redirect(url_for("login"))
+
+@app.route('/logout')
+def logout():
+    session.pop('id',None)
+    return redirect(url_for("home"))
+
+@app.route('/account')
+def account():
+    return redirect(url_for("home"))
+
 
 @app.errorhandler(404)
 def page_not_found(error):

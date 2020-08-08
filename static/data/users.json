@@ -1,4 +1,5 @@
 {
-    "rboud":"on",
-    "rboudrouss":"off"
+    "rboud": "on",
+    "rboudrouss": "on",
+    "test": "off"
 }
