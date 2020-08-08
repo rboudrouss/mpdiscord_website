@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}MP ON !{% endblock %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block content %}
+<form action="#" method='POST'>
+    {% if mp == "on" %}
+        <p>Your mps are on</p>
+    {% elif mp == "off" %}
+        <p>Your mps are off</p>
+    {% endif %}
+        <input type="submit" value="switch your mps !">
+</form>
+{% endblock %}

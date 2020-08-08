@@ -1,6 +1,1 @@
-{
-    "r.boudrouss@gmail.com":{
-        "id":"rboud",
-        "password":"password"
-    }
-}
+{"r.boudrouss@gmail.com": {"id": "rboud", "password": "password"}, "test": {"id": "test", "password": "test"}}
