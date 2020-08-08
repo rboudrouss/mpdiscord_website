@@ -3,25 +3,27 @@ from json import loads,  dumps
 app = Flask(__name__)
 app.secret_key="not my actual secret key :p" # TODO find a better secret key
 # TODO account modification & compress useron,useroff,usernone.html in one file
+# TODO code admin interface
+
 
 # fonctions
 def write_users(users):
-    with open("./static/data/users.json",'w') as f:
+    with open("./data/users.json",'w') as f:
         f.write(dumps(users,sort_keys=True, indent=4))
     return True
 
 def read_users():
-    with open("./static/data/users.json",'r') as f:
+    with open("./data/users.json",'r') as f:
         accounts = loads(f.read())
     return accounts
 
 def write_accounts(accounts):
-    with open("./static/data/accounts.json",'w') as f:
+    with open("./data/accounts.json",'w') as f:
         f.write(dumps(accounts,sort_keys=True, indent=4))
     return True
 
 def read_accounts():
-    with open("./static/data/accounts.json",'r') as f:
+    with open("./data/accounts.json",'r') as f:
         accounts = loads(f.read())
     return accounts
 
@@ -129,7 +131,7 @@ def mymps():
         users = read_users()
         if request.method == "POST":
             users[session["id"]] = "on" if users[session["id"]] == "off" else "off"
-            write_users(users)
+            assert write_users(users)
         return render_template("mymps.html", mp = users[session["id"]])
     else:
         return redirect(url_for("login"))
