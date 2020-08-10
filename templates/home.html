@@ -7,14 +7,22 @@
 {% endblock %}
 
 {% block content %}
-<section class="about" id="about">
-    <h2 class="section__title section__title--about">On off discord mp</h2>
-    <p class="section__subtitle section__subtitle--about">c'est trop bien</p>
-    
-    <div class="about__body">
-        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Et, molestias itaque! Quaerat nemo, similique ullam recusandae qui magni numquam laudantium illo alias maiores eum repudiandae!</p>
-    </div>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <!-- flashed messages -->
+            {% for msg in messages %}
+                <p>{{ msg }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <section class="about" id="about">
+        <h2 class="section__title section__title--about">On off discord mp</h2>
+        <p class="section__subtitle section__subtitle--about">c'est trop bien</p>
+        
+        <div class="about__body">
+            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Et, molestias itaque! Quaerat nemo, similique ullam recusandae qui magni numquam laudantium illo alias maiores eum repudiandae!</p>
+        </div>
 
-    <img src="#" alt="" class="about-me__img">
-</section>
+        <img src="#" alt="" class="about-me__img">
+    </section>
 {% endblock %}

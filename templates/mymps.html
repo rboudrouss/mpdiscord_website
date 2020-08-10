@@ -7,12 +7,20 @@
 {% endblock %}
 
 {% block content %}
-<form action="#" method='POST'>
-    {% if mp == "on" %}
-        <p>Your mps are on</p>
-    {% elif mp == "off" %}
-        <p>Your mps are off</p>
-    {% endif %}
-        <input type="submit" value="switch your mps !">
-</form>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <!-- flashed messages -->
+            {% for msg in messages %}
+                <p>{{ msg }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <form action="#" method='POST'>
+        {% if mp == "on" %}
+            <p>Your mps are on</p>
+        {% elif mp == "off" %}
+            <p>Your mps are off</p>
+        {% endif %}
+            <input type="submit" value="switch your mps !">
+    </form>
 {% endblock %}

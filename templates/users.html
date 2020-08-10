@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+    {% if open_mp == "404" %}
+        <h2>{{user}} is not a user</h2>
+    {% elif open_mp %}
+        <h2>mps of {{user}} are on !</h2>
+    {% elif not open_mp %}
+        <h2>mps of {{user}} are off :(</h2>
+    {% endif %}
+{% endblock %}

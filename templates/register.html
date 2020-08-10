@@ -7,13 +7,21 @@
 {% endblock %}
 
 {% block content %}
-<form action="#" method='POST'>
-    <p>Mail</p>
-    <input type="text" name="mail">
-    <p>id discord</p>
-    <input type="text" name="id">
-    <p>Password</p>
-    <input type="password" name="password" id="input_password">
-    <input type="submit" value="Submit">
-</form>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <!-- flashed messages -->
+            {% for msg in messages %}
+                <p>{{ msg }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <form action="#" method='POST'>
+        <p>Mail</p>
+        <input type="email" name="mail" required>
+        <p>id discord</p>
+        <input type="text" name="id" required>
+        <p>Password</p>
+        <input type="password" name="password" id="input_password" required>
+        <input type="submit" value="Submit">
+    </form>
 {% endblock %}
