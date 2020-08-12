@@ -16,7 +16,7 @@
 <ul>
     {% for user in users %}
     <a href="/u/{{ user }}">
-        <li>{{ user }} mps are {{ "on" if users[user] else "off" }}</li>
+        <li>{{ accounts[user]['username'] }}#{{ accounts[user]['discriminator'] }} mps are {{ "on" if users[user] else "off" }}</li>
     </a>
     {% endfor %}
 </ul>

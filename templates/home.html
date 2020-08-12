@@ -7,14 +7,6 @@
 {% endblock %}
 
 {% block content %}
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <!-- flashed messages -->
-            {% for msg in messages %}
-                <p>{{ msg }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
     <section class="about" id="about">
         <h2 class="section__title section__title--about">On off discord mp</h2>
         <p class="section__subtitle section__subtitle--about">c'est trop bien</p>
@@ -25,4 +17,19 @@
 
         <img src="#" alt="" class="about-me__img">
     </section>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <!-- flashed messages -->
+            {% for category, message in messages %}
+                <script>
+                    Swal.fire({
+                        icon: '{{category}}',
+                        title: '{{message}}',
+                        showConfirmButton: false,
+                        timer: 1500
+                    })
+                </script>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 {% endblock %}

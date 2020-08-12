@@ -12,6 +12,7 @@
     {% block head %}{% endblock %}
 </head>
 <body>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
     <header>
         <div class="logo">
             <a href="/">
@@ -31,7 +32,6 @@
                 <li class="nav__item"><a href="/login" class="nav__link">Register</a></li>
                 {% else %}
                 <li class="nav__item"><a href="/mymps" class="nav__link">your mp statut</a></li>
-                <li class="nav__item"><a href="/account" class="nav__link">your account</a></li>
                 <li class="nav__item"><a href="/logout" class="nav__link">logout</a></li>
                 {% endif %}
             </ul>

@@ -6,11 +6,9 @@
 {% endblock %}
 
 {% block content %}
-    {% if open_mp == "404" %}
-        <h2>{{user}} is not a user</h2>
-    {% elif open_mp %}
-        <h2>mps of {{user}} are on !</h2>
+    {% if open_mp %}
+        <h2>mps of {{ accounts[user]['username'] }}#{{ accounts[user]['discriminator'] }} are on !</h2>
     {% elif not open_mp %}
-        <h2>mps of {{user}} are off :(</h2>
+        <h2>mps of {{ accounts[user]['username'] }}#{{ accounts[user]['discriminator'] }} are off :(</h2>
     {% endif %}
 {% endblock %}

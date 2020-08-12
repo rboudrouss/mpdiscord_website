@@ -1,17 +1,29 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, abort
 from json import loads, dumps
+from requests_oauthlib import OAuth2Session
 import os
 
-#TODO add discord auth
-#TODO find a better secret key
-#TODO add discord connection Authme2
 #TODO code admin interface
 #TODO convert "assert" to if not x : raise error
-#TODO add temporary padding for h2 in users
 #TODO code visual (css) => wanna une ampoule go on of
+#TODO eviter de donner l'email aussi dans le accounts
+#? do we really need the email?
 #? sql library 
 
+# Disable SSL requirement
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
+# Settings for your app
+base_discord_api_url = 'https://discordapp.com/api'
+client_id = r'742766849783103539' 
+client_secret = ""   #! attention a pas le divulguer
+scope = ['identify', 'email']
+token_url = 'https://discordapp.com/api/oauth2/token'
+authorize_url = 'https://discordapp.com/api/oauth2/authorize'
+
+
+
+# flask app
 app = Flask(__name__)
 app.secret_key= os.urandom(24)
 
@@ -68,97 +80,82 @@ def read_accounts():
 def home():
     return render_template("home.html")
 
-@app.route('/on')
-def on():
-    return render_template("useron.html")
+@app.route('/login')
+def login():
+    redirect_uri= request.url_root+'oauth_callback'
+    oauth = OAuth2Session(client_id, redirect_uri=redirect_uri, scope=scope)
+    login_url, state = oauth.authorization_url(authorize_url)
+    session['state'] = state
+    return redirect(login_url)
 
-@app.route('/off')
-def off():
-    return render_template("useroff.html")
+@app.route("/oauth_callback")
+def oauth_callback():
+    redirect_uri= request.url_root+'oauth_callback'
+    discord = OAuth2Session(client_id, redirect_uri=redirect_uri, state=session['state'], scope=scope)
+    token = discord.fetch_token(
+        token_url,
+        client_secret=client_secret,
+        authorization_response=request.url,
+    )
+    session['discord_token'] = token
+    return redirect(url_for('registering'))
+
+@app.route("/registering")
+def registering():
+    discord = OAuth2Session(client_id, token=session['discord_token'])
+    response = discord.get(base_discord_api_url + '/users/@me')
+    infos = response.json()
+    
+    session['id']=infos['id']
+    accounts = read_accounts()
+    if not infos['id'] in accounts:
+        accounts[infos['id']]={
+            'username':infos['username'],
+            'discriminator':infos['discriminator'],
+            'avatar':infos['avatar'],
+            'email':infos['email']
+        }
+        assert write_accounts(accounts)
+    
+        users = read_users()
+        users[session['id']]=True
+        assert write_users(users)
+    
+    flash(u'logged in successfuly !','success')
+    return redirect(url_for('home'))
 
 @app.route('/admin')
 def admin():
     return "admin"
 
-@app.route('/login', methods=['POST','GET'])
-def login():
-    if 'id' in session:
-        flash("already logged")
-        return redirect(url_for('mymps'))
-    else:
-        if request.method == "POST":
-            
-            # information requests
-            mail=request.form["mail"]
-            pwd=request.form["password"]
-            
-            # get accounts
-            accounts = read_accounts()
-            
-            # login teatement
-            if accounts.get(mail,False):
-                if accounts[mail]["password"] == pwd:
-                    session["id"] = accounts[mail]["id"]
-                    session["mail"] = mail
-                    print("logged in as", session["id"])
-                    flash("successfully logged")
-                    return redirect(url_for('mymps'))
-                else:
-                    flash('wrong password')
-                    print("wrong password")
-            else:
-                flash('wrong email')
-                print("wrong email")
-        
-        # return to login page in case of error or first visit
-        return render_template("login.html")
-
-@app.route('/register',methods=["POST","GET"])
-def register():
-    # global IDUSER
-    if 'id' in session:
-        if request.method == "POST":
-            return redirect(url_for('home')) #? maybe
-        flash("already logged")
-        return redirect(url_for('mymps'))
-    else:
-        if request.method == "POST":
-            
-            if register_method():
-                # return to home if successufuly registered
-                flash('successfully registred')
-                return redirect(url_for("home"))
-            else:
-                print("Error")
-                flash("Try again")
-        # return to register if first visit
-        return render_template("register.html")
-
 @app.route('/u/<user>')
 def user(user):
-    if user == session['id']:
-        return redirect(url_for('mymps'))
+    if 'id' in session:
+        print('session id',session['id'], user)
+        if user == session['id']:
+            return redirect(url_for('mymps'))
     else:
         users = read_users()
+        accounts = read_accounts()
         open_mp = users.get(user,"404")
+        if open_mp=='404':
+            abort(404)
         return render_template(
             "users.html",
             open_mp=open_mp,
-            user=user
+            user=user,
+            accounts=accounts
         )
-        # if open_mp == "404":
-        #     return render_template("usernone.html", user=user)
-        # elif open_mp:
-        #     return render_template("useron.html",user=user)
-        # elif not open_mp:
-        #     return render_template("useroff.html",user=user)
-        # else:
-        #     print("not possible")
 
 @app.route('/userlist')
 def userlist():
     users = read_users()
-    return render_template("userlist.html",users=users)
+    accounts = read_accounts()
+    return render_template(
+        "userlist.html",
+        users=users,
+        accounts=accounts
+    )
 
 @app.route('/mymps',methods=["POST","GET"])
 def mymps():
@@ -175,41 +172,9 @@ def mymps():
 def logout():
     session.pop('id',None)
     session.pop('mail',None)
+    session.pop('discord_token',None)
+    flash(u'logged out successfuly !','success')
     return redirect(url_for("home"))
-
-@app.route('/account',methods=["POST","GET"])
-def account():
-    if request.method == "POST":
-        
-        # delete old informations
-        accounts = read_accounts()
-        accounts.pop(session['mail'],None)
-        assert write_accounts(accounts)
-        
-        users = read_users()
-        users.pop(session['id'],None)
-        assert write_users(users)
-        
-        # write new information
-        if register_method():
-            flash("information successfuly updated")
-            return redirect(url_for('home'))
-    else :
-        if 'id' in session:
-            accounts = read_accounts()
-            user_infos = accounts[session["mail"]]
-            pwd = user_infos['password']
-            id_user = user_infos['id']
-            return render_template(
-                "account.html",
-                mail = session["mail"],
-                pwd = pwd,
-                id_user = id_user
-            )
-        else :
-            flash("not connected")
-            return redirect(url_for("login"))
-
 
 # 404 error
 @app.errorhandler(404)
