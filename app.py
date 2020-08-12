@@ -2,11 +2,13 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from json import loads, dumps
 from requests_oauthlib import OAuth2Session
 import os
+from secret_client_key import client_secret #! change before deploy
 
 #TODO code admin interface
 #TODO convert "assert" to if not x : raise error
-#TODO code visual (css) => wanna une ampoule go on of
+#TODO code visual (css) => wanna une ampoule go on off
 #TODO eviter de donner l'email aussi dans le accounts
+#TODO 
 #? do we really need the email?
 #? sql library 
 
@@ -16,7 +18,7 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 # Settings for your app
 base_discord_api_url = 'https://discordapp.com/api'
 client_id = r'742766849783103539' 
-client_secret = ""   #! attention a pas le divulguer
+client_secret = client_secret #! change before deploy
 scope = ['identify', 'email']
 token_url = 'https://discordapp.com/api/oauth2/token'
 authorize_url = 'https://discordapp.com/api/oauth2/authorize'
